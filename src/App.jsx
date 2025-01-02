@@ -11,6 +11,7 @@ const App = () => {
     { english: "No", spanish: "No" },
     { english: "Dog", spanish: "Perro" },
     { english: "Cat", spanish: "Gato" },
+    { english: "love", spanish: "amor"},
   ];
 
   // 1. Generate and shuffle cards
