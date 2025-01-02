@@ -2,6 +2,15 @@ import { useState } from "react";
 import "./App.css";
 
 const App = () => {
+  // MASH game categories
+  const mashCategories = {
+    domiciles: ["Mansion", "Apartment", "Shack", "House"],
+    partners: ["John", "Mary", "Tom", "Sarah", "Alex"],
+    children: [0, 1, 2, 3, 4],
+    cars: ["Tesla", "BMW", "Ford", "Honda"],
+  };
+
+  // Memory game translations
   const translations = [
     { english: "Hello", spanish: "Hola" },
     { english: "Goodbye", spanish: "Adiós" },
@@ -11,7 +20,7 @@ const App = () => {
     { english: "No", spanish: "No" },
     { english: "Dog", spanish: "Perro" },
     { english: "Cat", spanish: "Gato" },
-    { english: "love", spanish: "amor"},
+    { english: "Love", spanish: "Amor" },
   ];
 
   // 1. Generate and shuffle cards
@@ -28,9 +37,11 @@ const App = () => {
     return allCards;
   };
 
-  // States
+  // States for memory game
   const [cards, setCards] = useState(createShuffledCards());
   const [selectedCards, setSelectedCards] = useState([]); // Track selected cards
+  const [mashResult, setMashResult] = useState(null); // To store the MASH result
+  const [gameFinished, setGameFinished] = useState(false); // Track if the game is finished
 
   // Handle card click
   const handleCardClick = (index) => {
@@ -77,11 +88,35 @@ const App = () => {
         }, 1000); // 1 second delay
       }
     }
+
+    // Check if the game is finished (all cards are flipped)
+    if (newCards.every(card => card.flipped)) {
+      setGameFinished(true);
+    }
+  };
+
+  // Function to calculate the MASH result
+  const getMashResult = () => {
+    if (!gameFinished) return;
+
+    // Randomly select an option from each category
+    const randomPick = (category) => {
+      return mashCategories[category][Math.floor(Math.random() * mashCategories[category].length)];
+    };
+
+    const result = {
+      domicile: randomPick("domiciles"),
+      partner: randomPick("partners"),
+      children: randomPick("children"),
+      car: randomPick("cars"),
+    };
+
+    setMashResult(result);
   };
 
   return (
     <main>
-      <h1>Memory Game</h1>
+      <h1>Memory Card Game</h1> {/* Updated title */}
       <div className="grid">
         {cards.map((card, index) => (
           <div
@@ -93,6 +128,22 @@ const App = () => {
           </div>
         ))}
       </div>
+
+      {gameFinished && !mashResult && (
+        <div>
+          <button onClick={getMashResult}>Get Your MASH Fortune</button>
+        </div>
+      )}
+
+      {mashResult && (
+        <div className="mash-result">
+          <h2>Your MASH Fortune:</h2>
+          <p>Domicile: {mashResult.domicile}</p>
+          <p>Partner: {mashResult.partner}</p>
+          <p>Children: {mashResult.children}</p>
+          <p>Car: {mashResult.car}</p>
+        </div>
+      )}
     </main>
   );
 };
