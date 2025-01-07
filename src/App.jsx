@@ -2,15 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 const App = () => {
-  // MASH game categories (you can expand this if needed)
-  const mashCategories = {
-    domiciles: ["Mansion", "Apartment", "Shack", "House"],
-    partners: ["John", "Mary", "Tom", "Sarah", "Alex"],
-    children: [0, 1, 2, 3, 4],
-    cars: ["Tesla", "BMW", "Ford", "Honda"],
-  };
-
-  // Translations (you already have a list of words)
+  // Translations (only keeping the essential words)
   const translations = [
     { english: "Hello", spanish: "Hola" },
     { english: "Goodbye", spanish: "Adiós" },
@@ -22,61 +14,7 @@ const App = () => {
     { english: "Cat", spanish: "Gato" },
     { english: "Love", spanish: "Amor" },
     { english: "Bro", spanish: "Mano" },
-    { english: "Family", spanish: "Familia" },
-    { english: "Friend", spanish: "Amigo" },
-    { english: "Work", spanish: "Trabajo" },
-    { english: "School", spanish: "Escuela" },
-    { english: "Water", spanish: "Agua" },
-    { english: "Food", spanish: "Comida" },
-    { english: "House", spanish: "Casa" },
-    { english: "Car", spanish: "Coche" },
-    { english: "Game", spanish: "Juego" },
-    { english: "Night", spanish: "Noche" },
-    { english: "Morning", spanish: "Mañana" },
-    { english: "Friendship", spanish: "Amistad" },
-    { english: "Holiday", spanish: "Vacaciones" },
-    { english: "City", spanish: "Ciudad" },
-    { english: "Ocean", spanish: "Océano" },
-    { english: "Mountain", spanish: "Montaña" },
-    { english: "Rain", spanish: "Lluvia" },
-    { english: "Sun", spanish: "Sol" },
-    { english: "Moon", spanish: "Luna" },
-    { english: "Star", spanish: "Estrella" },
-    { english: "Flower", spanish: "Flor" },
-    { english: "Tree", spanish: "Árbol" },
-    { english: "Bird", spanish: "Pájaro" },
-    { english: "Fish", spanish: "Pescado" },
-    { english: "Fruit", spanish: "Fruta" },
-    { english: "Vegetable", spanish: "Verdura" },
-    { english: "Music", spanish: "Música" },
-    { english: "Dance", spanish: "Bailar" },
-    { english: "Movie", spanish: "Película" },
-    { english: "Book", spanish: "Libro" },
-    { english: "Computer", spanish: "Computadora" },
-    { english: "Phone", spanish: "Teléfono" },
-    { english: "Camera", spanish: "Cámara" },
-    { english: "Painting", spanish: "Pintura" },
-    { english: "Travel", spanish: "Viajar" },
-    { english: "Adventure", spanish: "Aventura" },
-    { english: "Learning", spanish: "Aprendizaje" },
-    
-    // Additional words
-    { english: "Happy", spanish: "Feliz" },
-    { english: "Sad", spanish: "Triste" },
-    { english: "Beautiful", spanish: "Hermoso" },
-    { english: "Strong", spanish: "Fuerte" },
-    { english: "Smart", spanish: "Inteligente" },
-    { english: "Fast", spanish: "Rápido" },
-    { english: "Slow", spanish: "Lento" },
-    { english: "Big", spanish: "Grande" },
-    { english: "Small", spanish: "Pequeño" },
-    { english: "Hot", spanish: "Caliente" },
-    { english: "Cold", spanish: "Frío" },
-    { english: "Light", spanish: "Luz" },
-    { english: "Dark", spanish: "Oscuro" },
-    { english: "Morning", spanish: "Mañana" },
-    { english: "Evening", spanish: "Tarde" },
-  
+
   ];
 
   // Adjust difficulty based on level
@@ -112,7 +50,7 @@ const App = () => {
   const [selectedCards, setSelectedCards] = useState([]); // Track selected cards
   const [gameFinished, setGameFinished] = useState(false); // Track if the game is finished
   const [score, setScore] = useState(0); // Track score
-  const [timer, setTimer] = useState(0); // Track time
+  const [timer, setTimer] = useState(0); // Track time in seconds
   const [gameTimer, setGameTimer] = useState(null); // Timer interval for countdown
   const [winMessage, setWinMessage] = useState(false); // Track win message visibility
 
@@ -146,7 +84,7 @@ const App = () => {
           ))
       ) {
         // It's a match! Reset selected cards and update score
-        setScore(prevScore => prevScore + 1);
+        setScore(prevScore => prevScore + 50); // Multiply the score by 50 on a match
         setSelectedCards([]);
       } else {
         // Not a match, flip back after a delay
@@ -167,7 +105,6 @@ const App = () => {
     if (newCards.every(card => card.flipped)) {
       if (level === 3) {
         setWinMessage(true); // Show win message when level 4 is completed
-        setTimeout(() => resetGame(), 3000); // Restart after 3 seconds
       } else {
         setGameFinished(true);
       }
@@ -176,7 +113,7 @@ const App = () => {
 
   // Start timer when the game starts
   useEffect(() => {
-    if (gameFinished) return; // Don't start timer if the game is finished
+    if (gameFinished || winMessage) return; // Don't start timer if the game is finished or won
 
     const timerInterval = setInterval(() => {
       setTimer(prevTimer => prevTimer + 1);
@@ -186,18 +123,7 @@ const App = () => {
 
     // Clean up the timer interval on unmount
     return () => clearInterval(timerInterval);
-  }, [gameFinished]);
-
-  // Reset the game (including level and score)
-  const resetGame = () => {
-    setLevel(0);
-    setScore(0);
-    setCards(getLevelCards(0));
-    setGameFinished(false);
-    setTimer(0);
-    setWinMessage(false); // Reset win message
-    clearInterval(gameTimer);
-  };
+  }, [gameFinished, winMessage]);
 
   // Function to handle level up after game is finished
   const levelUp = () => {
@@ -212,13 +138,30 @@ const App = () => {
     });
   };
 
+  // Format timer as MM:SS
+  const formatTime = (timeInSeconds) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
+
+  // Function to restart the game
+  const restartGame = () => {
+    setLevel(0);
+    setScore(0);
+    setTimer(0);
+    setCards(getLevelCards(0));
+    setGameFinished(false);
+    setWinMessage(false);
+  };
+
   return (
     <main>
       <h1>Memory Card Game</h1>
       <div className="game-stats">
         <p>Level: {level + 1}</p>
         <p>Score: {score}</p>
-        <p>Time: {timer} seconds</p>
+        <p>Time: {formatTime(timer)}</p>
       </div>
       <div className="grid">
         {cards.map((card, index) => (
@@ -238,9 +181,15 @@ const App = () => {
         </div>
       )}
 
-      {winMessage && <div className="win-message">You Win!</div>}
-
-      <button onClick={resetGame}>Restart Game</button>
+      {winMessage && (
+        <div className="result-box">
+          <h2>Congratulations!</h2>
+          <p>You completed the game!</p>
+          <p>Final Score: {score}</p>
+          <p>Time Taken: {formatTime(timer)}</p>
+          <button onClick={restartGame}>Restart Game</button>
+        </div>
+      )}
     </main>
   );
 };
